@@ -29,6 +29,21 @@
 				<form id="tag-form" action="/tagging" method="post"></form>
 				<!-- ############### Aufgabe1a Form1 Ende -->
 
+				<form action="/action_page.php">
+					<fieldset>
+						<legend>Enter new GeoTag</legend>
+					<label for="latitude">latitude</label><br>
+					<input type="text" id="latitude" name="latitude" placeholder="Beispiel Platzhalter" required maxlength="10"><br><br>
+					<label for="longitude">longitude</label><br>
+					<input type="text" id="longitude" name="longitude" placeholder="Beispiel Platzhalter" required maxlength="10"><br><br>
+					<label for="name">name</label><br>
+					<input type="text" id="name" name="name" placeholder="Beispiel Platzhalter" required maxlength="10"><br><br>
+					<label for="hashtag">hashtag</label><br>
+					<input type="text" id="hashtag" name="hashtag" placeholder="Beispiel Platzhalter" pattern="#[a-zA-Z]+" maxlength="11"><br><br>
+					<input type="submit" value="Submit">
+					</fieldset>
+				</form>
+
 			</section>
 
 			<section class="discovery">
@@ -37,6 +52,14 @@
 				<!-- ############### Aufgabe1a Form2 Start -->
 				<form id="filter-form" action="/discovery" method="post"></form>
 				<!-- ############### Aufgabe1a Form2 Ende -->
+
+				<form action="/action_page.php">
+					<fieldset>
+						<legend>Filter by SearchTerm</legend>
+				<label for="searchterm"></label>
+				<input type="text" id="searchterm" name="searchterm" placeholder="Beispiel Platzhalter">
+				<input type="submit" value="Apply">
+					</fieldset>
 
 				<div class="taglist">
 					<ul id="results">
@@ -49,7 +72,7 @@
 					<img id="result-img" src="./images/mapview.jpg" alt="a map with locations"/>
 					<div class="caption">Result map</div>
 				</div>
-
+				</form>
 			</section>
 
 		</main>
@@ -60,4 +83,3 @@
 
 	</body>
 </html>
-dwicnwiodcndwions
