@@ -6,3 +6,112 @@ body {
 a {
   color: #00B7FF;
 }
+* {
+  box-sizing: border-box;
+}
+.row::after {
+  content: "";
+  clear: both;
+  display: flex;
+}
+[class*="col-"] {
+  display: flex;
+  padding: 20px;
+  justify-content: flex-start;
+  /* flexbox-container*/
+}
+
+.col-1 {width: 8.33%;}
+.col-2 {width: 16.66%;}
+.col-3 {width: 25%;}
+.col-4 {width: 33.33%;}
+.col-5 {width: 41.66%;}
+.col-6 {width: 50%;}
+.col-7 {width: 58.33%;}
+.col-8 {width: 66.66%;}
+.col-9 {width: 75%;}
+.col-10 {width: 83.33%;}
+.col-11 {width: 91.66%;}
+.col-12 {width: 100%;}
+
+.col-11{
+  display: block;
+  color: whitesmoke;
+  background-color: grey;
+}
+.discovery{
+  margin-left: 30px;
+}
+
+.discovery input{
+  padding: 5px;
+}
+
+.tagging input{
+  padding: 5px;
+
+}
+.taglist ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.taglist li {
+  padding: 15px;
+  margin-bottom: 7px;
+  background-color: #33b5e5;
+  color: #ffffff;
+}
+
+.taglist li:hover {
+  background-color: #0099cc;
+}
+
+.tagmap{
+  margin-left: 20px;
+}
+
+@media (min-width: 360px) {
+  [class*="col-"] {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    width: 100%;
+  }
+  .discovery {
+    margin-left: 0px;
+  }
+
+  .discovery input {
+    padding: 0px;
+  }
+
+  .tagging input {
+    padding: 0px; /* padding und margin ursprünglich auf 5-20px gestellt -> bei minimierung des fensters versetzt */
+  }
+}
+
+@media (min-width: 720px) {
+  [class*="col-"] {
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+    width: 100%;
+  }
+  .col-11{
+    display: block; /*.col-11 = header */
+  }
+
+  .discovery{
+    margin-left: 30px;
+  }
+
+  .discovery input{
+    padding: 5px;
+  }
+
+  .tagging input{
+    padding: 5px; /* padding und margin wieder zurückgeändert */
+  }
+}
