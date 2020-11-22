@@ -121,6 +121,7 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 
         updateLocation: function() {
             // TODO Hier Inhalt der Funktion "update" ergänzen
+            console.log(tryLocate())
         }
 
     }; // ... Ende öffentlicher Teil
@@ -134,4 +135,5 @@ var gtaLocator = (function GtaLocator(geoLocationApi) {
 $(function() {
     alert("Please change the script 'geotagging.js'");
     // TODO Hier den Aufruf für updateLocation einfügen
+    alert(typeof tryLocate);
 });
