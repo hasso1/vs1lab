@@ -30,6 +30,7 @@ app.set('view engine', 'ejs');
  */
 
 // TODO: CODE ERGÄNZEN
+app.use(express.static('public')); //statische Dateien (CSS, Bilder, ..) werden mit express.static('verzeichnis') bereitsgestellt
 
 /**
  * Konstruktor für GeoTag Objekte.
@@ -38,16 +39,81 @@ app.set('view engine', 'ejs');
 
 // TODO: CODE ERGÄNZEN
 
+function GeoTag(latitude, longitude, name, hashtag, id){
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.name = name;
+    this.hashtag = hashtag;
+    this.id = id;
+
+    this.getLatitude = function () {
+        return this.latitude;
+    };
+    this.getLongitude = function () {
+        return this.longitude;
+    };
+    this.getName = function() {
+        return this.name;
+    };
+    this.getHashtag = function() {
+        return this.hashtag;
+    };
+    this.getId = function() {
+        return this.id;
+    }
+}
+
+
+
 /**
  * Modul für 'In-Memory'-Speicherung von GeoTags mit folgenden Komponenten:
  * - Array als Speicher für Geo Tags.
  * - Funktion zur Suche von Geo Tags in einem Radius um eine Koordinate.
  * - Funktion zur Suche von Geo Tags nach Suchbegriff.
- * - Funktion zum hinzufügen eines Geo Tags.
+ * - Funktion zum Hinzufügen eines Geo Tags.
  * - Funktion zum Löschen eines Geo Tags.
  */
-
+s
 // TODO: CODE ERGÄNZEN
+var InMemory = (function () { //InMemory-Modul
+    var tagList = []; //Arrayliste als Speicher für Tags
+    var id = 0;
+
+    return {
+        searchRadius: function (latitude, longitude, radius) { //Suche von GeoTags in einem Radius um eine Koordinate
+            let result = tagList.filter(function (input) { //input = was gesucht wird, "filter", um neues Array anhand der Results zu erstellen
+                return (
+                    Math.sqrt(Math.pow(input.getLatitude()) - latitude) <= radius &&
+                    Math.sqrt(Math.pow(input.getLongitude()) - longitude)   <= radius //Latitude und Longitude um Radius der Koordinate
+                );
+            });
+
+            return result;
+        },
+        searchTerm: function (term) { //Suche von GeoTags nach Suchbegriff
+                let result = tagList.filter(function (input)
+            {
+                    return (
+                        input.getName().contains(term) || //Name oder Hashtag erhalten
+                        input.getHashtag().contains(term)
+
+                    );
+                })
+            return result;
+        },
+
+        add: function (latitude, longitude, name, hashtag){ //Hinzufügen eines GeoTags
+            let newTag = GeoTag(latitude, longitude, name, hashtag, this.id);
+            this.id++;
+            tagList.push(newTag);
+        },
+
+        remove: function (id){ //Löschen eines GeoTags
+            tagList.splice(GeoTag.getCurrentPosition(), 1);
+        }
+    }
+
+}) ();
 
 /**
  * Route mit Pfad '/' für HTTP 'GET' Requests.
@@ -59,6 +125,7 @@ app.set('view engine', 'ejs');
  */
 
 app.get('/', function(req, res) {
+
     res.render('gta', {
         taglist: []
     });
@@ -79,6 +146,25 @@ app.get('/', function(req, res) {
 
 // TODO: CODE ERGÄNZEN START
 
+app.post('/tagging', function (req, res) {
+let lat = req.body.latitude;
+let lon = req.body.longitude;
+let name = req.body.name;
+let hashtag = req.body.hashtag;
+
+InMemory.add(lat, lon, name, hashtag); //neuer GeoTag erstellt und gespeichert
+
+    res.render('gta', {
+        taglist: InMemory.searchRadius(lat,lon,10), //Objekte liegen in einem Radius von 10 um die Koordinate
+        lat: lat,
+        lon: lon,
+        name: name,
+        hashtag: hashtag,
+        datatags: JSON.stringify(InMemory.searchRadius(lat, lon, 10))
+    });
+})
+
+
 /**
  * Route mit Pfad '/discovery' für HTTP 'POST' Requests.
  * (http://expressjs.com/de/4x/api.html#app.post.method)
@@ -93,21 +179,27 @@ app.get('/', function(req, res) {
 
 // TODO: CODE ERGÄNZEN
 
-/**
- * Setze Port und speichere in Express.
- */
+app.post('/discovery', function (req, res) {
+    let lat = req.body.latitude;
+    let lon = req.body.longitude;
+    let term = req.body.searchterm;
 
-var port = 3000;
-app.set('port', port);
+    if (term) {
+       var resultTerm = InMemory.searchTerm(term);
+        res.render('gta', {
+            taglist: resultTerm,
+            lat: lat,
+            lon: lon,
+            datatags: JSON.stringify(resultTerm)
+        })
+    } else {
+        var resultRadius =  InMemory.searchRadius(lat, lon, 10);
+        res.render('gta', {
+            taglist: resultRadius,
+            lat: lat,
+            lon: lon,
+            datatags: JSON.stringify(resultRadius)
 
-/**
- * Erstelle HTTP Server
- */
 
-var server = http.createServer(app);
-
-/**
- * Horche auf dem Port an allen Netzwerk-Interfaces
- */
-
-server.listen(port);
+        })}
+});
