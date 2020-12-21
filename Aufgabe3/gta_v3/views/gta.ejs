@@ -37,10 +37,7 @@
 				<h2 style="font-family:'Segoe UI'">Tagging</h2>
 
 				<!-- ############### Aufgabe1a Form1 Start -->
-				<form id="tag-form" action="/tagging" method="post"></form>
-				<!-- ############### Aufgabe1a Form1 Ende -->
-
-				<form action="/action_page.php">
+				<form id="tag-form" action="/tagging" method="post">
 					<fieldset>
 
 						<legend style="font-family:'Gill Sans MT'; font-size:15px">Enter new GeoTag</legend>
@@ -49,7 +46,7 @@
 							   required value="<%= lat %>"><br><br>
 						<label style="font-family:'Segoe UI'" for="longitude">longitude</label><br>
 						<input type="text" id="longitude" name="longitude" placeholder="Beispiel Platzhalter"
-							   required value="<%= lon %>"><br><br>
+							   required value="<%= lon %>"<br><br>
 						<label style="font-family:'Segoe UI'" for="name">name</label><br>
 						<input type="text" id="name" name="name" placeholder="Beispiel Platzhalter" required maxlength="10"><br><br>
 						<label style="font-family:'Segoe UI'" for="hashtag">hashtag</label><br>
@@ -66,16 +63,13 @@
 				<h2 style="font-family:'Segoe UI'">Discovery</h2>
 
 				<!-- ############### Aufgabe1a Form2 Start -->
-				<form id="filter-form" action="/discovery" method="post"></form>
-				<!-- ############### Aufgabe1a Form2 Ende -->
-
-				<form action="/action_page.php">
+				<form id="filter-form" action="/discovery" method="post">
 					<fieldset>
 						<legend style="font-family: 'Gill Sans MT'; font-size: 15px">Filter by SearchTerm</legend>
 						<label for="searchterm"></label>
 						<input type="text" id="searchterm" name="searchterm" placeholder="Beispiel Platzhalter">
-						<input type="hidden" id="hiddenlatitude" name="hiddenlatitude" value="<%= lat %>">
-						<input type="hidden" id="hiddenlongitude" name="longitude" value="<%= lon %>">
+						<input type="hidden" id="hiddenlatitude" name="hiddenlatitude" value="<%= lat %>" >
+						<input type="hidden" id="hiddenlongitude" name="hiddenlongitude" value="<%= lon %>">
 						<input type="submit" value="Apply">
 					</fieldset>
 
@@ -83,9 +77,9 @@
 						<div class="col-12 taglist">
 							<div class="taglist">
 								<ul id="results">
-									<% if (taglist !== undefined) taglist.forEach(function(gtag) { %>
+									<% if (taglist !== undefined){ taglist.forEach(function(gtag) { %>
 										<li><%= gtag.name %> ( <%= gtag.latitude %>,<%= gtag.longitude %>) <%= gtag.hashtag %> </li>
-									<% }); %>
+									<% }); }%>
 								</ul>
 							</div>
 
