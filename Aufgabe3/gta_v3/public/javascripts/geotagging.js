@@ -13,7 +13,7 @@ console.log("The script is going to start...");
 // Hier wird die verwendete API für Geolocations gewählt
 // Die folgende Deklaration ist ein 'Mockup', das immer funktioniert und eine fixe Position liefert.
 GEOLOCATIONAPI = {
-    getCurrentPosition: function(onsuccess) {
+    getCurrentPosition: function (onsuccess) {
         onsuccess({
             "coords": {
                 "latitude": 49.013790,
@@ -38,131 +38,131 @@ GEOLOCATIONAPI = navigator.geolocation;
  */
 var gtaLocator = (function GtaLocator(geoLocationApi) {
 
-    // Private Member
+        // Private Member
 
-    /**
-     * Funktion spricht Geolocation API an.
-     * Bei Erfolg Callback 'onsuccess' mit Position.
-     * Bei Fehler Callback 'onerror' mit Meldung.
-     * Callback Funktionen als Parameter übergeben.
-     */
-    var tryLocate = function(onsuccess, onerror) {
-        if (geoLocationApi) {
-            geoLocationApi.getCurrentPosition(onsuccess, function(error) {
-                var msg;
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        msg = "User denied the request for Geolocation.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        msg = "Location information is unavailable.";
-                        break;
-                    case error.TIMEOUT:
-                        msg = "The request to get user location timed out.";
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        msg = "An unknown error occurred.";
-                        break;
-                }
-                onerror(msg);
+        /**
+         * Funktion spricht Geolocation API an.
+         * Bei Erfolg Callback 'onsuccess' mit Position.
+         * Bei Fehler Callback 'onerror' mit Meldung.
+         * Callback Funktionen als Parameter übergeben.
+         */
+        var tryLocate = function (onsuccess, onerror) {
+            if (geoLocationApi) {
+                geoLocationApi.getCurrentPosition(onsuccess, function (error) {
+                    var msg;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            msg = "User denied the request for Geolocation.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            msg = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            msg = "The request to get user location timed out.";
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            msg = "An unknown error occurred.";
+                            break;
+                    }
+                    onerror(msg);
+                });
+            } else {
+                onerror("Geolocation is not supported by this browser.");
+            }
+        };
+
+        // Auslesen Breitengrad aus der Position
+        var getLatitude = function (position) {
+            return position.coords.latitude;
+        };
+
+        // Auslesen Längengrad aus Position
+        var getLongitude = function (position) {
+            return position.coords.longitude;
+        };
+
+        // Hier Google Maps API Key eintragen
+        var apiKey = "POmC3JwU1yN48Vj218yaA5U8jN3fqJKM";
+
+        /**
+         * Funktion erzeugt eine URL, die auf die Karte verweist.
+         * Falls die Karte geladen werden soll, muss oben ein API Key angegeben
+         * sein.
+         *
+         * lat, lon : aktuelle Koordinaten (hier zentriert die Karte)
+         * tags : Array mit Geotag Objekten, das auch leer bleiben kann
+         * zoom: Zoomfaktor der Karte
+         */
+        var getLocationMapSrc = function (lat, lon, tags, zoom) {
+            zoom = typeof zoom !== 'undefined' ? zoom : 10;
+
+            if (apiKey === "YOUR_API_KEY_HERE") {
+                console.log("No API key provided.");
+                return "images/mapview.jpg";
+            }
+
+            var tagList = "&pois=You," + lat + "," + lon;
+            if (tags !== undefined) tags.forEach(function (tag) {
+                tagList += "|" + tag.name + "," + tag.latitude + "," + tag.longitude;
             });
-        } else {
-            onerror("Geolocation is not supported by this browser.");
-        }
-    };
 
-    // Auslesen Breitengrad aus der Position
-    var getLatitude = function(position) {
-        return position.coords.latitude;
-    };
+            var urlString = "https://www.mapquestapi.com/staticmap/v4/getmap?key=" +
+                apiKey + "&size=600,400&zoom=" + zoom + "&center=" + lat + "," + lon + "&" + tagList;
 
-    // Auslesen Längengrad aus Position
-    var getLongitude = function(position) {
-        return position.coords.longitude;
-    };
+            console.log("Generated Maps Url: " + urlString);
+            return urlString;
+        };
 
-    // Hier Google Maps API Key eintragen
-    var apiKey = "POmC3JwU1yN48Vj218yaA5U8jN3fqJKM";
+        return { // Start öffentlicher Teil des Moduls ...
 
-    /**
-     * Funktion erzeugt eine URL, die auf die Karte verweist.
-     * Falls die Karte geladen werden soll, muss oben ein API Key angegeben
-     * sein.
-     *
-     * lat, lon : aktuelle Koordinaten (hier zentriert die Karte)
-     * tags : Array mit Geotag Objekten, das auch leer bleiben kann
-     * zoom: Zoomfaktor der Karte
-     */
-    var getLocationMapSrc = function(lat, lon, tags, zoom) {
-        zoom = typeof zoom !== 'undefined' ? zoom : 10;
+            // Public Member
 
-        if (apiKey === "YOUR_API_KEY_HERE") {
-            console.log("No API key provided.");
-            return "images/mapview.jpg";
-        }
-
-        var tagList = "&pois=You," + lat + "," + lon;
-        if (tags !== undefined) tags.forEach(function(tag) {
-            tagList += "|" + tag.name + "," + tag.latitude + "," + tag.longitude;
-        });
-
-        var urlString = "https://www.mapquestapi.com/staticmap/v4/getmap?key=" +
-            apiKey + "&size=600,400&zoom=" + zoom + "&center=" + lat + "," + lon + "&" + tagList;
-
-        console.log("Generated Maps Url: " + urlString);
-        return urlString;
-    };
-
-    return { // Start öffentlicher Teil des Moduls ...
-
-        // Public Member
-
-        readme: "Dieses Objekt enthält 'öffentliche' Teile des Moduls.",
+            readme: "Dieses Objekt enthält 'öffentliche' Teile des Moduls.",
 
 
-        updateLocation: function() {
-            // TODO Hier Inhalt der Funktion "update" ergänzen
+            updateLocation: function () {
+                // TODO Hier Inhalt der Funktion "update" ergänzen
 
-            function onsuccess(position) {
+                let imageNode = document.getElementById("result-img");
+                let tags = JSON.parse(imageNode.getAttribute("data-tags"));
 
-                let latitude = getLatitude(position);
-                let longitude = getLongitude(position);
+                if (document.getElementById("latitude").value == '' || document.getElementById("longitude").value == '') {
+                    tryLocate(function (onsuccess) {
 
+                            let lat = getLatitude(onsuccess);
+                            let lon = getLongitude(onsuccess);
+                            document.getElementById("latitude").value = lat;
+                            document.getElementById("longitude").value = lon;
+                            document.getElementById("hiddenlatitude").value = lat;
+                            document.getElementById("hiddenlongitude").value = lon;
+                            imageNode.src = getLocationMapSrc(lat, lon, tags, 10);
 
+                        },
 
-                document.getElementById("latitude").value = getLatitude(position);
-                document.getElementById("longitude").value = getLongitude(position);
-                document.getElementById("hiddenlatitude").value = getLatitude(position);
-                document.getElementById("hiddenlongitude").value = getLongitude(position);
-
-                let image_url = getLocationMapSrc(latitude,longitude);
-
-                document.getElementById("result-img").src = image_url;
-
-
-
+                        function onerror(onerror) {
+                            alert(onerror);
+                        }
+                    )
+                } else {
+                    let lat = document.getElementById("latitude").value;
+                    let lon = document.getElementById("longitude").value;
+                    imageNode.src = getLocationMapSrc(lat, lon, tags, 10);
+                }
             }
 
-            function onerror(msg) {
-                alert(msg);
-            }
-
-
-            tryLocate(onsuccess,onerror);
-        }
-
-    }; // ... Ende öffentlicher Teil
-})(GEOLOCATIONAPI);
+        }; // ... Ende öffentlicher Teil
+    }
+)(GEOLOCATIONAPI);
 
 /**
  * $(function(){...}) wartet, bis die Seite komplett geladen wurde. Dann wird die
  * angegebene Funktion aufgerufen. An dieser Stelle beginnt die eigentliche Arbeit
  * des Skripts.
  */
-$(function() {
+$(function () {
     //alert("Please change the script 'geotagging.js'");
 
     // TODO Hier den Aufruf für updateLocation einfügen
 
-        gtaLocator.updateLocation();
+    gtaLocator.updateLocation();
 });

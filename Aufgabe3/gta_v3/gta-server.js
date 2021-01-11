@@ -30,7 +30,7 @@ app.set('view engine', 'ejs');
  */
 
 // TODO: CODE ERGÄNZEN
-app.use(express.static('public')); //statische Dateien (CSS, Bilder, ..) werden mit express.static('verzeichnis') bereitsgestellt
+app.use(express.static('public'));
 
 /**
  * Konstruktor für GeoTag Objekte.
@@ -38,13 +38,11 @@ app.use(express.static('public')); //statische Dateien (CSS, Bilder, ..) werden 
  */
 
 // TODO: CODE ERGÄNZEN
-
-function GeoTag(latitude, longitude, name, hashtag, id){
+function GeoTag(latitude, longitude, name, hashtag) {
     this.latitude = latitude;
     this.longitude = longitude;
     this.name = name;
     this.hashtag = hashtag;
-    this.id = id;
 
     this.getLatitude = function () {
         return this.latitude;
@@ -52,68 +50,85 @@ function GeoTag(latitude, longitude, name, hashtag, id){
     this.getLongitude = function () {
         return this.longitude;
     };
-    this.getName = function() {
+    this.getName = function () {
         return this.name;
     };
-    this.getHashtag = function() {
+    this.getHashtag = function () {
         return this.hashtag;
     };
-    this.getId = function() {
-        return this.id;
-    }
 }
-
-
 
 /**
  * Modul für 'In-Memory'-Speicherung von GeoTags mit folgenden Komponenten:
  * - Array als Speicher für Geo Tags.
  * - Funktion zur Suche von Geo Tags in einem Radius um eine Koordinate.
  * - Funktion zur Suche von Geo Tags nach Suchbegriff.
- * - Funktion zum Hinzufügen eines Geo Tags.
+ * - Funktion zum hinzufügen eines Geo Tags.
  * - Funktion zum Löschen eines Geo Tags.
  */
-s
+
 // TODO: CODE ERGÄNZEN
-var InMemory = (function () { //InMemory-Modul
-    var tagList = []; //Arrayliste als Speicher für Tags
-    var id = 0;
+var Memory = (function () {
+
+    var MyTags = [];
+
+    var last_lon;
+    var last_lat;
 
     return {
-        searchRadius: function (latitude, longitude, radius) { //Suche von GeoTags in einem Radius um eine Koordinate
-            let result = tagList.filter(function (input) { //input = was gesucht wird, "filter", um neues Array anhand der Results zu erstellen
+        add: function (GeoTag) {
+            MyTags.push(GeoTag);
+        },
+
+        delete: function (GeoTag){
+            const index = MyTags.indexOf(GeoTag);
+            if (index > -1) {
+                MyTags.splice(index, 1);
+            }
+        },
+
+        searchByRadius: function (latitude, longitude, radius) {
+            var foundTags = MyTags.filter(function (tag) {
+               var dx = tag.getLatitude() - latitude;
+                var dy = tag.getLongitude() - longitude;
+
                 return (
-                    Math.sqrt(Math.pow(input.getLatitude()) - latitude) <= radius &&
-                    Math.sqrt(Math.pow(input.getLongitude()) - longitude)   <= radius //Latitude und Longitude um Radius der Koordinate
+                    Math.sqrt(dx*dx + dy*dy) < radius
+
                 );
             });
-
-            return result;
+            return foundTags;
         },
-        searchTerm: function (term) { //Suche von GeoTags nach Suchbegriff
-                let result = tagList.filter(function (input)
+
+        searchByTerm: function (searchterm) {
+            var foundTags = MyTags.filter(function (tag) {
+                return (
+                    tag.getName().toString().includes(searchterm) ||
+                    tag.getHashtag().toString().includes(searchterm)
+                );
+            });
+            return foundTags;
+        },
+
+        saveLastGeoTag: function (latitude, longitude){
+            if(latitude !== undefined && longitude !== undefined)
             {
-                    return (
-                        input.getName().contains(term) || //Name oder Hashtag erhalten
-                        input.getHashtag().contains(term)
-
-                    );
-                })
-            return result;
+                last_lat = latitude;
+                last_lon = longitude;
+            }
         },
 
-        add: function (latitude, longitude, name, hashtag){ //Hinzufügen eines GeoTags
-            let newTag = GeoTag(latitude, longitude, name, hashtag, this.id);
-            this.id++;
-            tagList.push(newTag);
+        getLastLon: function () {
+            return last_lon;
         },
 
-        remove: function (id){ //Löschen eines GeoTags
-            tagList.splice(GeoTag.getCurrentPosition(), 1);
-        }
+        getLastLat: function () {
+            return last_lat;
+        },
+
+
     }
-
-}) ();
+})();
 
 /**
  * Route mit Pfad '/' für HTTP 'GET' Requests.
@@ -126,8 +141,15 @@ var InMemory = (function () { //InMemory-Modul
 
 app.get('/', function(req, res) {
 
+    let lon = req.body.longitude;
+    let lat = req.body.latitude;
+
+    Memory.saveLastGeoTag(lat, lon);
+
     res.render('gta', {
-        taglist: []
+        taglist: [],
+        lat: Memory.getLastLat(),
+        lon: Memory.getLastLon()
     });
 });
 
@@ -147,23 +169,23 @@ app.get('/', function(req, res) {
 // TODO: CODE ERGÄNZEN START
 
 app.post('/tagging', function (req, res) {
-let lat = req.body.latitude;
-let lon = req.body.longitude;
-let name = req.body.name;
-let hashtag = req.body.hashtag;
+    let lat = req.body.latitude;
+    let lon = req.body.longitude;
+    let name = req.body.name;
+    let hashtag = req.body.hashtag;
 
-InMemory.add(lat, lon, name, hashtag); //neuer GeoTag erstellt und gespeichert
+    var newTag = new GeoTag(lat, lon, name, hashtag);
+
+    Memory.add(newTag);
+    Memory.saveLastGeoTag(lat, lon);
 
     res.render('gta', {
-        taglist: InMemory.searchRadius(lat,lon,10), //Objekte liegen in einem Radius von 10 um die Koordinate
+        taglist: Memory.searchByRadius(lat, lon, 10),
         lat: lat,
         lon: lon,
-        name: name,
-        hashtag: hashtag,
-        datatags: JSON.stringify(InMemory.searchRadius(lat, lon, 10))
+        datatags: JSON.stringify(Memory.searchByRadius(lat, lon, 10))
     });
-})
-
+});
 
 /**
  * Route mit Pfad '/discovery' für HTTP 'POST' Requests.
@@ -178,28 +200,43 @@ InMemory.add(lat, lon, name, hashtag); //neuer GeoTag erstellt und gespeichert
  */
 
 // TODO: CODE ERGÄNZEN
-
 app.post('/discovery', function (req, res) {
-    let lat = req.body.latitude;
-    let lon = req.body.longitude;
-    let term = req.body.searchterm;
+    var lat = req.body.hiddenlatitude;
+    var lon = req.body.hiddenlongitude;
+    var searchterm = req.body.searchterm;
 
-    if (term) {
-       var resultTerm = InMemory.searchTerm(term);
+    if (searchterm) {
         res.render('gta', {
-            taglist: resultTerm,
+            taglist: Memory.searchByTerm(searchterm),
             lat: lat,
             lon: lon,
-            datatags: JSON.stringify(resultTerm)
+            datatags: JSON.stringify(Memory.searchByTerm(searchterm))
         })
     } else {
-        var resultRadius =  InMemory.searchRadius(lat, lon, 10);
         res.render('gta', {
-            taglist: resultRadius,
+            taglist: Memory.searchByRadius(lat, lon, 10),
             lat: lat,
             lon: lon,
-            datatags: JSON.stringify(resultRadius)
-
-
-        })}
+            datatags: JSON.stringify(Memory.searchByRadius(lat, lon, 10))
+        })
+    }
 });
+
+/**
+ * Setze Port und speichere in Express.
+ */
+
+var port = 3000;
+app.set('port', port);
+
+/**
+ * Erstelle HTTP Server
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Horche auf dem Port an allen Netzwerk-Interfaces
+ */
+
+server.listen(port);
